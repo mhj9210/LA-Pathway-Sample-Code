@@ -1,0 +1,26 @@
+import React from "react";
+import PropTypes from "prop-types";
+
+const RadioButtons = props => {
+  return (
+    <div className="radio radio-primary">
+      <input
+        name="answerId"
+        id={props.value}
+        type="radio"
+        value={props.value}
+        className="form-check-input"
+        onChange={props.onAnswered}
+      />
+      <label htmlFor={props.value}>{props.text}</label>
+    </div>
+  );
+};
+
+RadioButtons.propTypes = {
+  value: PropTypes.number,
+  onAnswered: PropTypes.func,
+  text: PropTypes.string
+};
+
+export default RadioButtons;
