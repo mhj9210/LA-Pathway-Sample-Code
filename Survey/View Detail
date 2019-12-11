@@ -1,0 +1,41 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { NavLink } from "react-router-dom";
+
+const ViewDetails = props => {
+  return (
+    <div className="col-sm-12 col-xl-10 m-auto pt-4">
+      <div className="card">
+        <div className="card-header bg-secondary">
+          <h5>{props.location.state.title}</h5>
+        </div>
+        <div className="card-body">
+          <h5>{props.location.state.description}</h5>
+        </div>
+        <div className="card-footer">
+          <h6>Created: {props.location.state.dateCreated.slice(0, 10)}</h6>
+          <NavLink
+            to="/admin/survey/sections"
+            className="btn btn-pill btn-primary float-right"
+          >
+            Go Back
+          </NavLink>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+ViewDetails.propTypes = {
+  location: PropTypes.shape({
+    state: PropTypes.shape({
+      id: PropTypes.number,
+      title: PropTypes.string,
+      description: PropTypes.string,
+      dateCreated: PropTypes.any
+    })
+  }),
+  goBack: PropTypes.func
+};
+
+export default ViewDetails;
