@@ -1,0 +1,27 @@
+import React from "react";
+import PropTypes from "prop-types";
+import "./wizardCss.css";
+
+const CheckBox = props => {
+  return (
+    <div className="checkbox checkbox-primary">
+      <input
+        type="checkbox"
+        name="answerId"
+        id={props.value}
+        value={props.value}
+        onChange={props.clickedCheckBox}
+        className="form-check-input"
+      />
+      <label htmlFor={props.value}>{props.text}</label>
+    </div>
+  );
+};
+
+CheckBox.propTypes = {
+  value: PropTypes.number,
+  clickedCheckBox: PropTypes.func,
+  text: PropTypes.string
+};
+
+export default CheckBox;
