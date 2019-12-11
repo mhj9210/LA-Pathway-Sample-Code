@@ -1,0 +1,21 @@
+import React from "react";
+import { Input } from "reactstrap";
+import PropTypes from "prop-types";
+
+const PageSizeChange = props => {
+  return (
+    <Input type="select" onChange={props.onChange} value={props.value}>
+      <option value={4}>Page Size</option>
+      <option value={8}>8</option>
+      <option value={12}>12</option>
+      <option value={16}>16</option>
+    </Input>
+  );
+};
+
+PageSizeChange.propTypes = {
+  onChange: PropTypes.func,
+  value: PropTypes.number
+};
+
+export default PageSizeChange;
