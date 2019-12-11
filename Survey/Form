@@ -1,0 +1,219 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { Formik, Field } from "formik";
+import sectionsValidationSchema from "./sectionsValidationSchema";
+import * as surveySectionsService from "../../services/surveySectionService";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+class SurveyForm extends React.Component {
+  state = {
+    formData: {
+      id: 0,
+      surveyId: 0,
+      title: "",
+      description: "",
+      sortOrder: 0
+    },
+    isEditing: false
+  };
+
+  componentDidMount() {
+    if (this.props.location.state) {
+      let formData = this.props.location.state;
+      this.setFormData(formData);
+    } else {
+      const id = this.props.match.params;
+      this.editSurvey(id);
+    }
+  }
+
+  editSurvey = value => {
+    let payload = value;
+    surveySectionsService
+      .update(payload)
+      .then(this.updateSuccess)
+      .catch(this.updateError);
+  };
+
+  updateSuccess = () => {
+    this.props.history.push("/admin/survey/sections");
+    toast.success("Survey Update Successful.");
+  };
+
+  updateError = error => {
+    toast.error(error.message);
+  };
+
+  setFormData = data => {
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        formData: data,
+        isEditing: true
+      };
+    });
+  };
+
+  handleSubmit = values => {
+    values.id = this.state.formData.id;
+    this.editSurvey(values);
+  };
+
+  goBack = () => {
+    this.props.history.push(`/admin/survey/sections`);
+  };
+
+  render() {
+    return (
+      <Formik
+        enableReinitialize={true}
+        validationSchema={sectionsValidationSchema}
+        initialValues={this.state.formData}
+        isInitialValid={this.state.isEditing}
+        onSubmit={this.handleSubmit}
+      >
+        {props => {
+          const {
+            values,
+            errors,
+            touched,
+            handleSubmit,
+            isValid,
+            isSubmitting
+          } = props;
+          return (
+            <form onSubmit={handleSubmit} className="col-sm-12">
+              <div className="card">
+                <div className="card-header">
+                  <h5>Survey Update</h5>
+                </div>
+                <div className="card-body">
+                  <div className="theme-form">
+                    <div className="row form-group">
+                      <label
+                        className="col-sm-3 col-form-label"
+                        htmlFor="title"
+                      >
+                        Title
+                      </label>
+                      <div className="col-sm-9">
+                        <Field
+                          placeholder=" Title"
+                          type="text"
+                          name="title"
+                          values={values.title}
+                          className={
+                            !errors.title && touched.title
+                              ? "form-control"
+                              : "form-control"
+                          }
+                        />
+                        {errors.title && touched.title && (
+                          <span className="text-danger mt-1">
+                            {errors.title}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="row form-group">
+                      <label
+                        className="col-sm-3 col-form-label"
+                        htmlFor="description"
+                      >
+                        Description
+                      </label>
+                      <div className="col-sm-9">
+                        <Field
+                          name="description"
+                          placeholder=" Description"
+                          type="text"
+                          values={values.description}
+                          className={
+                            !errors.description && touched.description
+                              ? "form-control"
+                              : "form-control"
+                          }
+                        />
+                        {errors.description && touched.description && (
+                          <span className="text-danger mt-1">
+                            {errors.description}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="row form-group">
+                      <label
+                        className="col-sm-3 col-form-label"
+                        htmlFor="sortOrder"
+                      >
+                        Sort Order
+                      </label>
+                      <div className="col-sm-9">
+                        <Field
+                          className={
+                            !errors.sortOrder && touched.sortOrder
+                              ? "form-control"
+                              : "form-control"
+                          }
+                          id="Website"
+                          name="sortOrder"
+                          type="number"
+                          values={values.sortOrder}
+                          placeholder=" Sort Order"
+                        />
+                        {errors.sortOrder && touched.sortOrder && (
+                          <span className="text-danger mt-1">
+                            {errors.sortOrder}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-footer">
+                  <button
+                    className="btn-pill btn btn-secondary"
+                    type="submit"
+                    onClick={this.goBack}
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    className="ml-2 btn-pill btn btn-primary"
+                    disabled={!isValid || isSubmitting}
+                    type="submit"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          );
+        }}
+      </Formik>
+    );
+  }
+}
+
+SurveyForm.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired
+    })
+  }),
+  location: PropTypes.shape({
+    state: PropTypes.shape({
+      id: PropTypes.number,
+      surveyId: PropTypes.number,
+      title: PropTypes.string,
+      description: PropTypes.string,
+      sortOrder: PropTypes.number
+    })
+  }),
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
+  })
+};
+
+export default SurveyForm;
