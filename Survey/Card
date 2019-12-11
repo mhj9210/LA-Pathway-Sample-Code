@@ -1,0 +1,64 @@
+import React from "react";
+import PropTypes from "prop-types";
+import "./Sections.css";
+
+const SectionCards = props => {
+  const handleEditClick = () => {
+    props.surveyForm(props.section);
+  };
+
+  const viewDetails = () => {
+    props.viewDetails(props.section);
+  };
+
+  return (
+    <div className="col-lg-6 col-md-6 m-auto" key={props.section.id}>
+      <div className="card card-absolute sectionCard">
+        <div className="ribbon ribbon-secondary ribbon-clip">
+          <h5>{props.section.title}</h5>
+        </div>
+        <div className="card-body pt-5">
+          <h4>
+            {props.section.description.length > 75
+              ? props.section.description.slice(0, 75) + "..."
+              : props.section.description}
+          </h4>
+        </div>
+        <div>
+          <div className="pt-3">
+            <h5>
+              <span>Survey Created: </span>
+              {props.section.dateCreated.slice(0, 10)}
+            </h5>
+          </div>
+          <button
+            className="btn btn-pill btn-primary m-2 sectionCardEditBtn"
+            onClick={handleEditClick}
+          >
+            <i className="fa fa-gear pr-2"></i> Edit{" "}
+          </button>
+
+          <button
+            className="float-left btn btn-pill btn-success m-2 sectionCardEditBtn"
+            onClick={viewDetails}
+          >
+            <i className="fa fa-file pr-2"></i> View Details{" "}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+SectionCards.propTypes = {
+  section: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    dateCreated: PropTypes.any.isRequired
+  }),
+  surveyForm: PropTypes.func,
+  viewDetails: PropTypes.func
+};
+
+export default SectionCards;
