@@ -1,0 +1,305 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { Formik, Field } from "formik";
+import UserProfilesValidationSchema from "./userProfilesValidationSchema";
+import * as UserProfilesServices from "../../services/userProfilesServices";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import FileUpload from "../files/FileUpload";
+import "./UserProfileCss.css";
+
+class UserProfileForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      formData: {
+        id: 0,
+        userId: 0,
+        firstName: "",
+        lastName: "",
+        mi: "",
+        avatarUrl: ""
+      },
+      isEditing: false
+    };
+  }
+
+  componentDidMount() {
+    const { id } = this.props.match.params;
+    if (id) {
+      let formData = this.props.location.state;
+      if (formData) {
+        this.setFormData(formData);
+      } else {
+        UserProfilesServices.getById(id).then(this.setFormData);
+      }
+    }
+  }
+
+  editUser = value => {
+    UserProfilesServices.edit(value)
+      .then(this.editUserSuccess)
+      .catch(this.editUserError);
+  };
+
+  editUserSuccess = () => {
+    this.props.history.push("/admin/users/profiles");
+    toast.success("Update Successful!");
+  };
+
+  editUserError = error => {
+    toast.error(error.message);
+  };
+
+  setFormData = formData => {
+    if (formData.item) {
+      formData = formData.item;
+    }
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        formData: formData,
+        isEditing: true
+      };
+    });
+  };
+
+  handleEditUser = values => {
+    values.id = this.state.formData.id;
+    values.avatarUrl = this.state.formData.avatarUrl;
+    if (values.avatarUrl === null || values.avatarUrl === undefined) {
+      return toast.error("Please upload a photo");
+    } else {
+      this.editUser(values);
+    }
+  };
+
+  addNewUser = payload => {
+    UserProfilesServices.add(payload)
+      .then(this.addNewUserSuccess)
+      .catch(this.addNewUserError);
+  };
+
+  addNewUserSuccess = () => {
+    this.props.history.push("/admin/users/profile");
+    toast.success("New User Created!");
+  };
+
+  addNewUserError = error => {
+    toast.error(error.message);
+  };
+
+  handleAddUser = values => {
+    this.addNewUser(values);
+  };
+
+  fileUploadSuccess = data => {
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        formData: {
+          ...prevState.formData,
+          avatarUrl: data[0]
+        }
+      };
+    });
+  };
+
+  fileUploadFail = () => {
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        formData: {
+          ...prevState.formData,
+          avatarUrl: null
+        }
+      };
+    });
+  };
+  goBack = () => {
+    this.props.history.push("/admin/users/profiles");
+  };
+
+  render() {
+    return (
+      <Formik
+        enableReinitialize={true}
+        initialValues={this.state.formData}
+        isInitialValid={this.state.isEditing}
+        validationSchema={UserProfilesValidationSchema}
+        onSubmit={
+          this.state.isEditing ? this.handleEditUser : this.handleAddUser
+        }
+      >
+        {props => {
+          const {
+            values,
+            errors,
+            touched,
+            handleSubmit,
+            isValid,
+            isSubmitting
+          } = props;
+          return (
+            <form className="col-xl-8 m-auto" onSubmit={handleSubmit}>
+              <div className="card">
+                <div className="card-header">
+                  <h4 className="card-title mb-0">
+                    {this.state.isEditing ? "Edit Profile" : "Add New Profile"}
+                  </h4>
+                  <div className="card-options">
+                    <a
+                      href="#"
+                      className="card-options-collapse"
+                      data-toggle="card-collapse"
+                    >
+                      <i className="fe fe-chevron-up" />
+                    </a>
+                    <a
+                      href="#"
+                      className="card-options-remove"
+                      data-toggle="card-remove"
+                    >
+                      <i className="fe fe-x" />
+                    </a>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <div className="row mb-4">
+                    <div className="col-auto">
+                      <img
+                        className="img-90 rounded-circle"
+                        height="90"
+                        alt=""
+                        src={
+                          this.state.isEditing &&
+                          this.state.formData.avatarUrl !== null
+                            ? this.state.formData.avatarUrl
+                            : "https://bit.ly/2DUtLg6"
+                        }
+                      />
+                    </div>
+                    <div className="col">
+                      <h4 className="pt-4">
+                        {this.state.isEditing
+                          ? `${props.values.firstName} ${props.values.mi} ${props.values.lastName}`
+                          : `${props.values.firstName} ${props.values.mi} ${props.values.lastName}`}
+                      </h4>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">First Name</label>
+                    <Field
+                      className={
+                        errors.firstName && touched.firstName
+                          ? "form-control errorMessage"
+                          : "form-control"
+                      }
+                      placeholder=" First Name"
+                      type="text"
+                      name="firstName"
+                      values={values.firstName}
+                    />
+                    {errors.firstName && touched.firstName && (
+                      <span className="text-danger mt-1">
+                        {errors.firstName}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Last Name</label>
+                    <Field
+                      type="text"
+                      values={values.lastName}
+                      className={
+                        errors.lastName && touched.lastName
+                          ? "form-control errorMessage"
+                          : "form-control"
+                      }
+                      name="lastName"
+                      placeholder=" Last Name"
+                    />
+                    {errors.lastName && touched.lastName && (
+                      <span className="text-danger mt-1">
+                        {errors.lastName}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Mi</label>
+                    <Field
+                      type="text"
+                      name="mi"
+                      values={values.mi}
+                      className={
+                        !errors.mi && touched.mi
+                          ? "form-control errorMessage"
+                          : "form-control"
+                      }
+                      placeholder=" Middle Initial"
+                    />
+                    {errors.mi && touched.mi && (
+                      <span className="text-danger mt-1">{errors.mi}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">User Image</label>
+                    <div className="">
+                      <FileUpload
+                        onError={this.fileUploadFail}
+                        onSuccess={this.fileUploadSuccess}
+                      />
+                    </div>
+                  </div>
+                  <div className="editSubmitBtn row">
+                    <div className="col-3">
+                      <button
+                        className="p-2 btn-pill btn btn-secondary btn-block"
+                        type="submit"
+                        onClick={this.goBack}
+                      >
+                        Go Back
+                      </button>
+                    </div>
+                    <div className="col-3">
+                      <button
+                        className="p-2 btn-pill btn btn-primary btn-block"
+                        disabled={!isValid || isSubmitting}
+                        type="submit"
+                      >
+                        {this.state.isEditing ? "Edit" : "Submit"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          );
+        }}
+      </Formik>
+    );
+  }
+}
+
+UserProfileForm.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string
+    })
+  }),
+  location: PropTypes.shape({
+    state: PropTypes.shape({
+      id: PropTypes.number,
+      userId: PropTypes.number,
+      firstName: PropTypes.string,
+      lastName: PropTypes.string,
+      mi: PropTypes.string,
+      avatarUrl: PropTypes.string
+    })
+  }),
+  history: PropTypes.shape({
+    push: PropTypes.func
+  })
+};
+
+export default UserProfileForm;
